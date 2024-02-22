@@ -22,13 +22,16 @@ class TestOnlineStore(unittest.TestCase):
     # The total amount payable in an order should be limited
     def test_8(self):
         num_items = 12
+        # 商品は12個
         items = [c.Item(type='product', description='tv', amount=99999, quantity=num_items)]
         for i in range(num_items):
+            # 支払いは12個
             items.append(c.Item(type='payment', description='invoice_' + str(i), amount=99999, quantity=1))
+        print(f"len(items): {len(items)}") # 13
         order_1 = c.Order(id='1', items=items)
         self.assertEqual(c.validorder(order_1), 'Total amount payable for an order exceeded')
 
-        # Put payments before products
+        # Put payments before products 商品の前に支払いを置く
         items = items[1:] + [items[0]]
         order_2 = c.Order(id='2', items=items)
         self.assertEqual(c.validorder(order_2), 'Total amount payable for an order exceeded')

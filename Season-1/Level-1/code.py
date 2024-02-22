@@ -18,17 +18,29 @@ Order = namedtuple('Order', 'id, items')
 Item = namedtuple('Item', 'type, description, amount, quantity')
 
 def validorder(order: Order):
-    net = 0
+    net = Decimal('0')
+    total_products_amount = Decimal('0')
+    total_payments_amount = Decimal('0')
+    payment_upper_limit = Decimal('10000')  # 上限値を$10,000とする
 
     for item in order.items:
         item_amount = Decimal(str(item.amount))
-        item_quantity = Decimal(str(item.quantity)) # 在庫？量が少数のなのはおかしいと思う
+        item_quantity = Decimal(str(item.quantity))
         if item.type == 'payment':
-            net += item_amount
+            total_payments_amount += item_amount
         elif item.type == 'product':
-            net -= item_amount * item_quantity
+            total_products_amount += item_amount * item_quantity
         else:
             return "Invalid item type: %s" % item.type
+
+    # 商品の合計金額と支払いの合計金額の差を計算
+    net = total_payments_amount - total_products_amount
+    print(f"total_payments_amount: {total_payments_amount}")
+    print(f"total_products_amount: {total_products_amount}")
+
+    # 商品の合計金額が上限を超えているか確認
+    if total_products_amount > payment_upper_limit:
+        return "Total amount payable for an order exceeded"
 
     if net != 0:
         return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net)
